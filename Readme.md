@@ -61,7 +61,7 @@ StreamPost is a powerful Blog Content Management System (CMS) built using **ASP.
 
 1. **Clone the Repository**:
    ```bash
-   git clone https://github.com/your-repo/ContentEdge.git
+   git clone https://github.com/Nilesh-Nath/StreamPost
    cd StreamPost
    ```
 
