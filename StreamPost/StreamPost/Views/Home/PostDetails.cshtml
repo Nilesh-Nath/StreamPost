@@ -1,0 +1,215 @@
+﻿@{
+    ViewData["Title"] = "PostDetails";
+}
+
+<style>
+    .bg-light {
+    background-color: #f8f9fa !important;
+    }
+
+    .shadow-sm {
+    box-shadow: 0 .125rem .25rem rgba(0, 0, 0, .075) !important;
+    }
+
+    .rounded {
+    border-radius: .25rem !important;
+    }
+
+    .fw-semibold {
+    font-weight: 600 !important;
+    }
+
+    .bg-white {
+    background-color: #ffffff !important;
+    }
+</style>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+
+@if (Model.Post.User.Id == Model.UserID)
+{
+    <div class="d-flex justify-content-end">
+        <div class="dropdown">
+            <button class="btn btn-sm" type="button" id="postOptions" data-bs-toggle="dropdown" aria-expanded="false">
+                <i class="bi bi-three-dots fs-5"></i>
+            </button>
+            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="postOptions">
+                <li>
+                    <a class="dropdown-item text-primary" asp-action="EditPost" asp-controller="Home" asp-route-id="@Model.Post.PostID">
+                        <i class="bi bi-pencil-square"></i> Edit Post
+                    </a>
+                </li>
+                <li>
+                    <button type="submit" class="dropdown-item text-danger" data-bs-toggle="modal" data-bs-target="#deleteModal">
+                        <i class="bi bi-trash"></i> Delete Post
+                    </button>
+                </li>
+            </ul>
+        </div>
+    </div>
+}
+
+<section>
+    <div class="container py-4">
+        <div class="w-100 mx-auto p-3 bg-light shadow-sm rounded">
+
+            @if (Model.Post.FeaturedImage != null)
+            {
+                <div class="text-center mb-3">
+                    <img src="@Model.Post.FeaturedImage" alt="Post Image"
+                    class="img-fluid rounded shadow-sm" style="max-height: 400px; object-fit: cover;">
+                </div>
+            }
+
+            <h1 class="text-dark fw-bold">@Model.Post.Title</h1>
+
+            <span class="text-uppercase small mb-2 px-2" style="color:mediumpurple">
+                <i class="bi bi-tag me-1"></i> @Model.Post.Category.CategoryName
+            </span>
+
+            <div class="d-flex flex-wrap gap-3 my-3">
+                <small class="text-secondary">
+                    <i class="bi bi-person me-1"></i> @Model.Post.User.UserName
+                </small>
+                <small class="text-secondary">
+                    <i class="bi bi-calendar me-1"></i> @Model.Post.PublishedDate
+                </small>
+                <small id="likeNumber" class="text-secondary">
+                    <i class="bi bi-star me-1"></i> @Model.Post.LikeNumber Likes
+                </small>
+                <small id="commentNumber" class="text-secondary">
+                    <i class="bi bi-chat-dots me-1"></i> @Model.Post.CommentNumber Comments
+                </small>
+            </div>
+
+            <div class="mt-4">
+                <p class="text-dark fs-5" style="line-height: 1.8;">
+                    @Html.Raw(Model.Post.Description)
+                </p>
+            </div>
+
+            <div class="d-flex justify-content-end mt-3">
+                <button id="LikeBtn" data-postid="@Model.Post.PostID" type="submit" class="btn @(Model.IsLiked  ? "btn-danger text-white" : "btn-outline-secondary")">
+                    <i class="bi @(Model.IsLiked ? "bi-hand-thumbs-up-fill" : "bi-hand-thumbs-up") me-1"></i>
+                    @(Model.IsLiked ? "Liked" : "Like")
+                </button>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="container mt-2">
+    <div class="w-100">
+        <form id="CommentForm" class="bg-light p-3 shadow-sm rounded">
+            <h4 class="text-dark fw-bold">Leave a comment</h4>
+            <input type="hidden" name="Id" value="@Model.UserID" />
+            <input type="hidden" name="PostID" value="@Model.Post.PostID"  />
+            <div class="mb-3">
+                <textarea class="form-control" rows="4" name="CommentText" placeholder="Write your comment here..." required></textarea>
+            </div>
+            <div class="d-flex justify-content-between align-items-center">
+                <button type="submit" class="btn btn-primary">Post Comment</button>
+            </div>
+        </form>
+    </div>
+</section>
+
+<section class="container mt-4">
+    <div class="bg-light p-3 rounded shadow-sm">
+        <h4 class="fw-bold text-dark">Comments</h4>
+        <div class="mt-3 comments-container">
+            @if (Model.Comments != null && Model.Comments.Count > 0)
+            {
+                @foreach (var comment in Model.Comments)
+                {
+                    <div class="p-3 mb-2 bg-white shadow-sm rounded d-flex justify-content-between">
+                        <div>
+                            <span class="fw-semibold text-dark">@comment.User.UserName</span>
+                            <p class="text-muted mb-0">@comment.CommentText</p>
+                        </div>
+                        @if(comment.User.Id == Model.Post.Id)
+                        {
+                            <div class="badge text-dark">
+                                <i class="bi bi-award"></i>
+                                <span>Author</span>
+                            </div>
+                        }
+                    </div>
+                }
+            }
+            else
+            {
+                <div class="p-3 mb-2 bg-white shadow-sm rounded">
+                    <span class="fw-semibold text-dark">No comments yet!</span>
+                </div>
+            }
+        </div>
+    </div>
+</section>
+
+
+<section class="container mt-5">
+    <div class="w-100">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h3>Must Read</h3>
+        </div>
+
+        <div class="row g-0">
+            @foreach (var mostLikes in Model.MostLikes)
+            {
+                <div class="col-12 col-md-6">
+                    <a asp-controller="Home" asp-action="PostDetails" asp-route-id="@mostLikes.PostID" class="text-decoration-none h-100 d-block">
+                        <div class="card text-white border-0 position-relative h-100">
+                            @if (@mostLikes.FeaturedImage != null)
+                            {
+                                <img src="@mostLikes.FeaturedImage" class="card-img h-100 w-100" alt="Featured Image"
+                                     style="filter: brightness(70%); object-fit: cover; border-radius: 0;">
+                            }
+                            <div class="card-img-overlay d-flex flex-column justify-content-end"
+                                 style="background: linear-gradient(to top, rgba(0, 0, 0, 0.8), transparent); border-radius: 0;">
+                                <span class="text-uppercase text-light small mb-2 px-2">
+                                    <i class="bi bi-tag me-1"></i> @mostLikes.Category.CategoryName
+                                </span>
+                                <h3 class="card-title fw-bold px-2 text-white">@mostLikes.Title</h3>
+                                <div class="d-flex flex-wrap align-items-center gap-2 px-2 pb-2">
+                                    <small class="text-light badge bg-opacity-50 bg-dark">
+                                        <i class="bi bi-person me-1"></i> @mostLikes.User.UserName
+                                    </small>
+                                    <small class="text-light badge bg-opacity-50 bg-dark">
+                                        <i class="bi bi-calendar me-1"></i> @mostLikes.PublishedDate
+                                    </small>
+                                    <small class="text-light badge bg-opacity-50 bg-dark">
+                                        <i class="bi bi-star me-1"></i> @mostLikes.LikeNumber Likes
+                                    </small>
+                                    <small class="text-light badge bg-opacity-50 bg-dark">
+                                        <i class="bi bi-chat-dots me-1"></i> @mostLikes.CommentNumber Comments
+                                    </small>
+                                </div>
+                            </div>
+                        </div>
+                    </a>
+                </div>
+            }
+        </div>
+    </div>
+</section>
+
+<div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h1 class="modal-title fs-5" id="deleteModalLabel">Delete Post</h1>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form asp-action="DeletePost" asp-controller="Home" asp-route-PostID="@Model.Post.PostID" method="post">
+                    <p>Are you sure you want to delete this post?</p>
+                    <button type="submit" class="btn btn-danger"><i class="bi bi-trash"></i>Delete</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="~/js/PostDetails.js"></script>

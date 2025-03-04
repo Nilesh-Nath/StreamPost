@@ -1,0 +1,188 @@
+﻿@inject Microsoft.Extensions.Configuration.IConfiguration Configuration;
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - StreamPost</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/StreamPost.styles.css" asp-append-version="true" />
+
+    @* Fonts *@
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@100;200;300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+
+    @* Bootstrap Icons *@
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
+    @* Tiney MCE *@
+    <script src="https://cdn.tiny.cloud/1/@Configuration["TinyMCE:ApiKey"]/tinymce/7/tinymce.min.js" referrerpolicy="origin"></script>
+
+    @* JQuery CDN *@
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+
+    @* Cropper CDN *@
+    <link href="https://cdn.jsdelivr.net/npm/cropperjs@1.6.2/dist/cropper.min.css" rel="stylesheet">
+
+</head>
+<body>
+    @if (ViewData["ShowHeaderFooter"] == null || (bool)ViewData["ShowHeaderFooter"])
+    {
+        <header>
+            <nav class="navbar navbar-expand-lg navbar-light container">
+                <div class="container-fluid w-100 d-flex justify-content-between align-items-center">
+
+                    @* Left Side: Logo *@
+                    <a class="navbar-brand me-3" asp-area="" asp-controller="Home" asp-action="Index">
+                        <img src="~/images/logo2_nobg.png" width="50px" /> <span>StreamPost</span>
+                    </a>
+
+                    @* Hamburger Menu Button *@
+                    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
+                    aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                        <span class="navbar-toggler-icon"></span>
+                    </button>
+
+                    @* Collapsible Menu *@
+                    <div class="collapse navbar-collapse" id="navbarNav">
+                        <ul class="navbar-nav ms-auto text-uppercase fw-bold" style="font-size:12px">
+                            @foreach (var category in Model.categories)
+                            {
+                                <li class="nav-item">
+                                    <a class="nav-link text-dark" asp-controller="Category" asp-action="Category" asp-route-id="@category.CategoryID">
+                                        @category.CategoryName
+                                    </a>
+                                </li>
+                            }
+                        </ul>
+
+                        @* Search Bar & Logout Inside Hamburger *@
+                        <div class="d-lg-none mt-3">
+                            <form class="d-flex">
+                                <input type="text" class="form-control search-form-control" placeholder="Search...." />
+                                <button id="searchBtn" class="btn"><i class="bi bi-search"></i></button>
+                            </form>
+                            <form asp-action="Logout" asp-controller="Login" class="mt-2">
+                                <button class="btn btn-danger w-100">Logout</button>
+                            </form>
+                        </div>
+                    </div>
+
+                    <div class="d-none d-lg-flex align-items-center position-relative">
+                        <form method="POST" asp-controller="Category" asp-action="CustomCategory" class="d-flex mx-2">
+                            <input type="text" id="searchBox" name="query" class="form-control search-form-control" placeholder="Search...." autocomplete="off">
+                            <button id="searchBtn" type="submit" class="btn"><i class="bi bi-search"></i></button>
+                        </form>
+
+                        <ul id="searchResults" class="list-group position-absolute w-100 bg-white shadow rounded d-none" style="z-index: 1000; max-height: 200px; overflow-y: auto;"></ul>
+
+                        <div class="mx-2">
+                            <a asp-action="CreateBlog" asp-controller="CreateBlog" style="font-size:13px;" class="btn btn-outline-success">Create</a>
+                        </div>
+                        <div class="row">
+                            <div class="col-sm-6 d-flex justify-content-between align-items-center">
+                                <a asp-action="Profile" asp-controller="Profile" class="mb-0">
+                                    <img src="https://bootdey.com/img/Content/avatar/avatar7.png" alt="Profile" class="rounded-circle" style="width: 40px; height: 40px; object-fit: cover;">
+                                </a>
+                            </div>
+                        </div>
+
+                    </div>
+
+
+                </div>
+            </nav>
+        </header>
+    }
+
+    <div class="container">
+        <main role="main" class="pb-3">
+            @RenderBody()
+        </main>
+    </div>
+
+    @if (ViewData["ShowHeaderFooter"] == null || (bool)ViewData["ShowHeaderFooter"])
+    {
+        <footer class="text-center text-lg-start bg-body-tertiary text-muted border-top mt-5">
+            <section>
+                <div class="container text-center text-md-start mt-5">
+                    
+                    <div class="row mt-3">
+                        
+                        <div class="col-md-3 col-lg-4 col-xl-3 mx-auto mb-4">
+                            
+                            <h6 class="text-uppercase fw-bold mb-4">
+                                <img src="~/images/logo2.png" alt="...." width="50"/>StreamPost
+                            </h6>
+                            <div class="d-flex gap-2 justify-content-center align-items-center">
+                                <i class="bi bi-facebook fs-3 text-primary me-3"></i>
+                                <i class="bi bi-twitter-x fs-3 text-dark me-3"></i>
+                                <i class="bi bi-youtube fs-3 text-danger me-3"></i>
+                            </div>
+                        </div>
+                        <div class="col-md-2 col-lg-2 col-xl-2 mx-auto mb-4">
+                           
+                            <h6 class="text-uppercase fw-bold mb-4">
+                                Company
+                            </h6>
+                            <p>
+                                <a href="#!" class="text-reset">About</a>
+                            </p>
+                            <p>
+                                <a href="#!" class="text-reset">Contact</a>
+                            </p>
+                            <p>
+                                <a href="#!" class="text-reset">Our Staffs</a>
+                            </p>
+                            <p>
+                                <a href="#!" class="text-reset">Advertise</a>
+                            </p>
+                        </div>
+                        <div class="col-md-3 col-lg-2 col-xl-2 mx-auto mb-4">
+                           
+                            <h6 class="text-uppercase fw-bold mb-4">
+                                News
+                            </h6>
+                            <p>
+                                <a href="#!" class="text-reset">Technology</a>
+                            </p>
+                            <p>
+                                <a href="#!" class="text-reset">Politics</a>
+                            </p>
+                            <p>
+                                <a href="#!" class="text-reset">Sports</a>
+                            </p>
+                            <p>
+                                <a href="#!" class="text-reset">Entertainment</a>
+                            </p>
+                        </div>
+                        <div class="col-md-4 col-lg-3 col-xl-3 mx-auto mb-md-0 mb-4">
+                            
+                            <h6 class="text-uppercase fw-bold mb-4">Contact</h6>
+                            <p><i class="bi bi-geo-alt"></i> Jamal, White Durbar, Nepal</p>
+                            <p>
+                                <i class="bi bi-envelope"></i>
+                                streampost@postme.com
+                            </p>
+                            <p><i class="bi bi-phone"></i> + 01 234 567 88</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            <div class="text-center p-4" style="background-color: rgba(0, 0, 0, 0.05);">
+                © 2025 Copyright:
+                <a class="text-reset fw-bold" href="https://mdbootstrap.com/">streampost.com</a>
+            </div>
+        </footer>
+    } 
+
+    @* Cropper CDN *@
+    <script src="https://cdn.jsdelivr.net/npm/cropperjs@1.6.2/dist/cropper.min.js"></script>
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>
